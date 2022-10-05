@@ -28,6 +28,7 @@ function startupMenu() {
                     viewDirectReports();
                     break;
                 case "View Employees by Department":
+                    viewEmployeesByDept();
                     break;
                 case "Add Department":
                     addDepartment();
@@ -266,6 +267,33 @@ function viewDirectReports() {
                 qry.queryDirectReports(data.manager_id)
                     .then(([results]) => {
                         console.log(`\n\n\x1b[33mList of Direct Reports\n\x1b[0m`);
+                        console.table(results);
+                        startupMenu();
+                    });
+            });
+    });
+};
+
+function viewEmployeesByDept() {
+    qry.queryDepartments().then(([data]) => {
+        const deptOptions = data.map(({id, name}) => ({
+            name: name,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "id",
+                    message: "Which department would you like to view?",
+                    choices: deptOptions,
+                    loop: false
+                }
+            ]).then((data) => {
+                console.log(data.id);
+                qry.queryByDept(data.id)
+                    .then(([results]) => {
+                        console.log(`\n\n\x1b[33mEmployees by Department\n\x1b[0m`);
                         console.table(results);
                         startupMenu();
                     });
