@@ -20,7 +20,7 @@ In order to use this application, the user must run the application using node.j
 
 Video walkthrough of working application
 
-![Video walkthrough of working application](./assets/gifs/running-application-gif.gif)
+![Video walkthrough of working application](./assets/gifs/employee-tracker-walkthrough.gif)
 
 ## Credits
 While working on this project, our instructor, Poornima, told us to create a separate class file that would hold the SQL queries we use in the index.js file. And used the following libraries:
