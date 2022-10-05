@@ -19,8 +19,10 @@ function startupMenu() {
                     viewDepartments();
                     break;
                 case "View All Roles":
+                    viewRoles();
                     break;
                 case "View All Employees":
+                    viewEmployees();
                     break;
                 case "View Manager's Direct Reports":
                     break;
@@ -51,6 +53,20 @@ function viewDepartments() {
         console.table(result);
     }).then(() => startupMenu());
 
+};
+
+function viewRoles() {
+    qry.queryRoles().then(([result]) => {
+        console.log(`\n\n\x1b[33mList of All Roles\n\x1b[0m`);
+        console.table(result);
+    }).then(() => startupMenu());
+};
+
+function viewEmployees() {
+    qry.queryEmployees().then(([result]) => {
+        console.log(`\n\n\x1b[33mList of All Employees\n\x1b[0m`);
+        console.table(result);
+    }).then(() => startupMenu());
 };
 
 startupMenu();
