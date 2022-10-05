@@ -1,45 +1,56 @@
 const inquirer = require("inquirer");
-const mysql = require("mysql2");
-const cTable = require("console.table");
+require("console.table");
 
-const fs = require("fs");
+const qry = require("./lib/query");
 
-inquirer
-    .prompt([
-        {
-            type: "list",
-            name: "menu",
-            message: "What would you like to do?",
-            choices: ["View All Employees", "Add Employee", "Update Employee Role", "View All Roles", "Add Role", "View All Departments", "Add Department", "Quit"]
+function startupMenu() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "menu",
+                message: "What would you like to do?",
+                choices: ["View All Departments", "View All Roles", "View All Employees", "View Manager's Direct Reports", "View Employees by Department", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Quit"],
+                loop: false
+            }
+        ]).then((data) => {
+            switch(data.menu) {
+                case "View All Departments":
+                    viewDepartments();
+                    break;
+                case "View All Roles":
+                    break;
+                case "View All Employees":
+                    break;
+                case "View Manager's Direct Reports":
+                    break;
+                case "View Employees by Department":
+                    break;
+                case "Add Department":
+                    break;
+                case "Add Role":
+                    break;
+                case "Add Employee":
+                    break;
+                case "Update Employee Role":
+                    break;
+                case "Update Employee Manager":
+                    break;
+                case "Quit":
+                    break;
+                default:
+                    return;
+            }
         }
-    ]).then((data) => {
-        switch(data.menu) {
-            case "View All Employees":
-                console.log("function that queries employee table")
-                break;
-            case "Add Employee":
-                console.log("function that inserts into employee table")
-                break;
-            case "Update Employee Role":
-                console.log("function that updates employee record")
-                break;
-            case "View All Roles":
-                console.log("function that queries role table")
-                break;
-            case "Add Role":
-                console.log("function that inserts into role table")
-                break;
-            case "View All Departments":
-                console.log("function queries department table")
-                break;
-            case "Add Department":
-                console.log("function that inserts into department table")
-                break;
-            case "Quit":
-                console.log("ends the application")
-                break;
-            default:
-                return;
-        }
-    }
-    );
+        );
+};
+
+function viewDepartments() {
+    qry.queryDepartments().then(([result]) => {
+        console.log(`\n\n\x1b[33mList of All Departments\n\x1b[0m`);
+        console.table(result);
+    }).then(() => startupMenu());
+
+};
+
+startupMenu();
