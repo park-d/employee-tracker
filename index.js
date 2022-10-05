@@ -59,7 +59,8 @@ function startupMenu() {
                     removeEmployee();
                     break;
                 case "Quit":
-                    break;
+                    console.log(`Thanks for using Employee Tracker!`)
+                    process.exit();
                 default:
                     return;
             }
@@ -67,28 +68,35 @@ function startupMenu() {
         );
 };
 
+//For each of the functions in this seciton, I reference the SQL queries from defined class depending on which function (what is chose in inquirer), and since it is promise based, take the output and displays with console.table, and run the startup menu again
+// there are also extra steps with the .map prototype in which I create a new array for the options in the inquirer prompt, which are a (sometimes reformatted) key value pair so I can return the id to the SQL queries instead of the name of employee, role, or dept.
+
 //-----------------VIEW DATA FROM DATABASE SECTION-----------------\\
+
 function viewDepartments() {
     qry.queryDepartments().then(([result]) => {
-        console.log(`\n\n\x1b[33mList of All Departments\n\x1b[0m`);
+        console.log(`\n\n\x1b[35mList of All Departments\n\x1b[0m`);
         console.table(result);
-    }).then(() => startupMenu());
-
+        startupMenu();
+    })
 };
 
 function viewRoles() {
     qry.queryRoles().then(([result]) => {
-        console.log(`\n\n\x1b[33mList of All Roles\n\x1b[0m`);
+        console.log(`\n\n\x1b[35mList of All Roles\n\x1b[0m`);
         console.table(result);
-    }).then(() => startupMenu());
+        startupMenu();
+    })
 };
 
 function viewEmployees() {
     qry.queryEmployees().then(([result]) => {
-        console.log(`\n\n\x1b[33mList of All Employees\n\x1b[0m`);
+        console.log(`\n\n\x1b[35mList of All Employees\n\x1b[0m`);
         console.table(result);
-    }).then(() => startupMenu());
+        startupMenu();
+    });
 };
+
 
 function viewDirectReports() {
     qry.queryEmployees().then(([result]) => {
@@ -108,7 +116,7 @@ function viewDirectReports() {
             ]).then((data) => {
                 qry.queryDirectReports(data.manager_id)
                     .then(([results]) => {
-                        console.log(`\n\n\x1b[33mList of Direct Reports\n\x1b[0m`);
+                        console.log(`\n\n\x1b[35mList of Direct Reports\n\x1b[0m`);
                         console.table(results);
                         startupMenu();
                     });
@@ -135,7 +143,7 @@ function viewEmployeesByDept() {
                 console.log(data)
                 qry.queryByDept(data.id)
                     .then(([results]) => {
-                        console.log(`\n\n\x1b[33mEmployees by Department\n\x1b[0m`);
+                        console.log(`\n\n\x1b[35mEmployees by Department\n\x1b[0m`);
                         console.table(results);
                         startupMenu();
                     });
@@ -161,7 +169,7 @@ function viewTotalBudget() {
             ]).then((data) => {
                 qry.queryTotalBudget(data.id)
                     .then(([results]) => {
-                        console.log(`\n\n\x1b[33mTotal Utilized Budget\n\x1b[0m`);
+                        console.log(`\n\n\x1b[35mTotal Utilized Budget\n\x1b[0m`);
                         console.table(results);
                         startupMenu();
                     });
@@ -179,10 +187,9 @@ function addDepartment() {
                 message: "What is the name of the department?",
             }
         ]).then((data) => {
-            console.log(data);
             qry.insertDepartment(data)
                 .then(() => {
-                    console.log(`\n\n\x1b[35mAdded ${data.name} to the department database\n\x1b[0m`);
+                    console.log(`\n\n\x1b[32mAdded ${data.name} to the department database\n\x1b[0m`);
                     startupMenu();
                 });
         });
@@ -216,7 +223,7 @@ function addRole() {
             ]).then((data) => {
                 qry.insertRole(data)
                     .then(() => {
-                        console.log(`\n\n\x1b[35mAdded ${data.title} to the role database\n\x1b[0m`);
+                        console.log(`\n\n\x1b[32mAdded ${data.title} to the role database\n\x1b[0m`);
                         startupMenu();
                     });
             });
@@ -262,7 +269,7 @@ function addEmployee() {
                     }
                 ]).then((response) => {
                     qry.insertEmployee(response)
-                        .then(() => console.log(`\n\n\x1b[35mAdded ${response.first_name} ${response.last_name} to the role database\n\x1b[0m`))
+                        .then(() => console.log(`\n\n\x1b[32mAdded ${response.first_name} ${response.last_name} to the role database\n\x1b[0m`))
                         .then(() => startupMenu());
                 });
         });
@@ -298,8 +305,9 @@ function updateEmployeeRole() {
                         loop: false
                     }
                 ]).then((response) => {
-                    qry.updateEmployee(response)
-                        .then(() => console.log(`\n\n\x1b[35mUpdated employee's role in the employee database\n\x1b[0m`))
+                    console.log(response.role_id,response.id)
+                    qry.updateEmployeeRole(response.role_id, response.id)
+                        .then(() => console.log(`\n\n\x1b[33mUpdated employee's role in the employee database\n\x1b[0m`))
                         .then(() => startupMenu());
                 });
         });
@@ -334,8 +342,8 @@ function updateEmployeeManager() {
                         loop: false
                     }
                 ]).then((response) => {
-                    qry.updateEmployee(response)
-                        .then(() => console.log(`\n\n\x1b[35mUpdated employee's manager in the employee database\n\x1b[0m`))
+                    qry.updateEmployee(response.manager_id,response.id)
+                        .then(() => console.log(`\n\n\x1b[33mUpdated employee's manager in the employee database\n\x1b[0m`))
                         .then(() => startupMenu());
                 });
         });
@@ -360,7 +368,7 @@ function removeDepartment() {
                 }
             ]).then((response) => {
                 qry.deleteDepartment(response.id)
-                    .then(() => console.log(`\n\n\x1b[35mRemoved from department database\n\x1b[0m`))
+                    .then(() => console.log(`\n\n\x1b[31mRemoved from department database\n\x1b[0m`))
                     .then(() => startupMenu());
             });
     });
@@ -383,7 +391,7 @@ function removeRole() {
                 }
             ]).then((response) => {
                 qry.deleteRole(response.title)
-                    .then(() => console.log(`\n\n\x1b[35mRemoved from role database\n\x1b[0m`))
+                    .then(() => console.log(`\n\n\x1b[31mRemoved from role database\n\x1b[0m`))
                     .then(() => startupMenu());
             });
     });
@@ -406,7 +414,7 @@ function removeEmployee() {
                 }
             ]).then((response) => {
                 qry.deleteEmployee(response.id)
-                    .then(() => console.log(`\n\n\x1b[35mRemoved from employee database\n\x1b[0m`))
+                    .then(() => console.log(`\n\n\x1b[31mRemoved from employee database\n\x1b[0m`))
                     .then(() => startupMenu());
             });
     });
