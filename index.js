@@ -3,6 +3,7 @@ require("console.table");
 
 const qry = require("./lib/query");
 
+//-----------------INITIAL INQUIRER PROMPT/MENU-----------------\\
 function startupMenu() {
     inquirer
         .prompt([
@@ -10,7 +11,7 @@ function startupMenu() {
                 type: "list",
                 name: "menu",
                 message: "What would you like to do?",
-                choices: ["View All Departments", "View All Roles", "View All Employees", "View Manager's Direct Reports", "View Employees by Department", "Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Quit"],
+                choices: ["View All Departments", "View All Roles", "View All Employees", "View Manager's Direct Reports", "View Employees by Department", "View Total Utilized Budget of Department","Add Department", "Add Role", "Add Employee", "Update Employee Role", "Update Employee Manager", "Remove Department", "Remove Role", "Remove Employee", "Quit"],
                 loop: false
             }
         ]).then((data) => {
@@ -30,6 +31,9 @@ function startupMenu() {
                 case "View Employees by Department":
                     viewEmployeesByDept();
                     break;
+                case "View Total Utilized Budget of Department":
+                    viewTotalBudget();
+                    break;
                 case "Add Department":
                     addDepartment();
                     break;
@@ -45,6 +49,15 @@ function startupMenu() {
                 case "Update Employee Manager":
                     updateEmployeeManager();
                     break;
+                case "Remove Department":
+                    removeDepartment();
+                    break;
+                case "Remove Role":
+                    removeRole();
+                    break;
+                case "Remove Employee":
+                    removeEmployee();
+                    break;
                 case "Quit":
                     break;
                 default:
@@ -54,6 +67,7 @@ function startupMenu() {
         );
 };
 
+//-----------------VIEW DATA FROM DATABASE SECTION-----------------\\
 function viewDepartments() {
     qry.queryDepartments().then(([result]) => {
         console.log(`\n\n\x1b[33mList of All Departments\n\x1b[0m`);
@@ -76,6 +90,86 @@ function viewEmployees() {
     }).then(() => startupMenu());
 };
 
+function viewDirectReports() {
+    qry.queryEmployees().then(([result]) => {
+        const managerOptions = result.map(({id, first_name, last_name}) => ({
+            name: `${first_name} ${last_name}`,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "manager_id",
+                    message: "Which manager's direct reports would you like to view?",
+                    choices: managerOptions,
+                    loop: false
+                }
+            ]).then((data) => {
+                qry.queryDirectReports(data.manager_id)
+                    .then(([results]) => {
+                        console.log(`\n\n\x1b[33mList of Direct Reports\n\x1b[0m`);
+                        console.table(results);
+                        startupMenu();
+                    });
+            });
+    });
+};
+
+function viewEmployeesByDept() {
+    qry.queryDepartments().then(([result]) => {
+        const deptOptions = result.map(({id, name}) => ({
+            name: name,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "id",
+                    message: "Which department would you like to view?",
+                    choices: deptOptions,
+                    loop: false
+                }
+            ]).then((data) => {
+                console.log(data)
+                qry.queryByDept(data.id)
+                    .then(([results]) => {
+                        console.log(`\n\n\x1b[33mEmployees by Department\n\x1b[0m`);
+                        console.table(results);
+                        startupMenu();
+                    });
+            });
+    });
+};
+
+function viewTotalBudget() {
+    qry.queryDepartments().then(([result]) => {
+        const deptOptions = result.map(({id, name}) => ({
+            name: name,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "id",
+                    message: "Which department's budget would you like to view?",
+                    choices: deptOptions,
+                    loop: false
+                }
+            ]).then((data) => {
+                qry.queryTotalBudget(data.id)
+                    .then(([results]) => {
+                        console.log(`\n\n\x1b[33mTotal Utilized Budget\n\x1b[0m`);
+                        console.table(results);
+                        startupMenu();
+                    });
+            });
+    });
+};
+
+//-----------------ADD TO DATABASE SECTION-----------------\\
 function addDepartment() {
     inquirer
         .prompt([
@@ -95,8 +189,8 @@ function addDepartment() {
 };
 
 function addRole() {
-    qry.queryDepartments().then(([data]) => {
-        const options = data.map(({id, name}) => ({
+    qry.queryDepartments().then(([result]) => {
+        const options = result.map(({id, name}) => ({
             name: name,
             value: id
         }));
@@ -130,13 +224,13 @@ function addRole() {
 };
 
 function addEmployee() {
-    qry.queryEmployees().then(([dataEmp]) => {
-        const managerOptions = dataEmp.map(({id, first_name, last_name}) => ({
+    qry.queryEmployees().then(([resultEmp]) => {
+        const managerOptions = resultEmp.map(({id, first_name, last_name}) => ({
             name: `${first_name} ${last_name}`,
             value: id
         }));
-        qry.queryRoles().then(([dataRole]) => {
-            roleOptions = dataRole.map(({id, title}) => ({
+        qry.queryRoles().then(([resultRole]) => {
+            roleOptions = resultRole.map(({id, title}) => ({
                 name: title,
                 value: id
             }));
@@ -175,14 +269,15 @@ function addEmployee() {
     });
 };
 
+//-----------------UPDATE DATA IN DATABASE SECTION-----------------\\
 function updateEmployeeRole() {
-    qry.queryEmployees().then(([dataEmp]) => {
-        const employeeOptions = dataEmp.map(({id, first_name, last_name}) => ({
+    qry.queryEmployees().then(([resultEmp]) => {
+        const employeeOptions = resultEmp.map(({id, first_name, last_name}) => ({
             name: `${first_name} ${last_name}`,
             value: id
         }));
-        qry.queryRoles().then(([dataRole]) => {
-            roleOptions = dataRole.map(({id, title}) => ({
+        qry.queryRoles().then(([resultRole]) => {
+            roleOptions = resultRole.map(({id, title}) => ({
                 name: title,
                 value: id
             }));
@@ -212,13 +307,13 @@ function updateEmployeeRole() {
 };
 
 function updateEmployeeManager() {
-    qry.queryEmployees().then(([dataEmp]) => {
-        const employeeOptions = dataEmp.map(({id, first_name, last_name}) => ({
+    qry.queryEmployees().then(([resultEmp]) => {
+        const employeeOptions = resultEmp.map(({id, first_name, last_name}) => ({
             name: `${first_name} ${last_name}`,
             value: id
         }));
-        qry.queryEmployees().then(([dataManager]) => {
-            managerOptions = dataManager.map(({id, first_name, last_name}) => ({
+        qry.queryEmployees().then(([resultManager]) => {
+            managerOptions = resultManager.map(({id, first_name, last_name}) => ({
                 name: `${first_name} ${last_name}`,
                 value: id
             }));
@@ -233,8 +328,8 @@ function updateEmployeeManager() {
                     },
                     {
                         type: "list",
-                        name: "role_id",
-                        message: "Which manager do you want to assign the selected employee?",
+                        name: "manager_id",
+                        message: "To which manager do you want to assign the selected employee?",
                         choices: managerOptions,
                         loop: false
                     }
@@ -247,36 +342,10 @@ function updateEmployeeManager() {
     });
 };
 
-function viewDirectReports() {
-    qry.queryEmployees().then(([managerData]) => {
-        const managerOptions = managerData.map(({id, first_name, last_name}) => ({
-            name: `${first_name} ${last_name}`,
-            value: id
-        }));
-        inquirer
-            .prompt([
-                {
-                    type: "list",
-                    name: "manager_id",
-                    message: "Which manager's direct reports would you like to view?",
-                    choices: managerOptions,
-                    loop: false
-                }
-            ]).then((data) => {
-                console.log(data.manager_id);
-                qry.queryDirectReports(data.manager_id)
-                    .then(([results]) => {
-                        console.log(`\n\n\x1b[33mList of Direct Reports\n\x1b[0m`);
-                        console.table(results);
-                        startupMenu();
-                    });
-            });
-    });
-};
-
-function viewEmployeesByDept() {
-    qry.queryDepartments().then(([data]) => {
-        const deptOptions = data.map(({id, name}) => ({
+//-----------------REMOVE FROM DATABASE SECTION-----------------\\
+function removeDepartment() {
+    qry.queryDepartments().then(([result]) => {
+        const deptOptions = result.map(({id, name}) => ({
             name: name,
             value: id
         }));
@@ -285,19 +354,62 @@ function viewEmployeesByDept() {
                 {
                     type: "list",
                     name: "id",
-                    message: "Which department would you like to view?",
+                    message: "Which department do you want to remove?",
                     choices: deptOptions,
                     loop: false
                 }
-            ]).then((data) => {
-                console.log(data.id);
-                qry.queryByDept(data.id)
-                    .then(([results]) => {
-                        console.log(`\n\n\x1b[33mEmployees by Department\n\x1b[0m`);
-                        console.table(results);
-                        startupMenu();
-                    });
+            ]).then((response) => {
+                qry.deleteDepartment(response.id)
+                    .then(() => console.log(`\n\n\x1b[35mRemoved from department database\n\x1b[0m`))
+                    .then(() => startupMenu());
             });
     });
 };
+
+function removeRole() {
+    qry.queryRoles().then(([result]) => {
+        const roleOptions = result.map(({id, title}) => ({
+            name: title,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "title",
+                    message: "Which role do you want to remove?",
+                    choices: roleOptions,
+                    loop: false
+                }
+            ]).then((response) => {
+                qry.deleteRole(response.title)
+                    .then(() => console.log(`\n\n\x1b[35mRemoved from role database\n\x1b[0m`))
+                    .then(() => startupMenu());
+            });
+    });
+};
+
+function removeEmployee() {
+    qry.queryEmployees().then(([result]) => {
+        const employeeOptions = result.map(({id, first_name, last_name}) => ({
+            name: `${first_name} ${last_name}`,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "id",
+                    message: "Which employee do you want to remove?",
+                    choices: employeeOptions,
+                    loop: false
+                }
+            ]).then((response) => {
+                qry.deleteEmployee(response.id)
+                    .then(() => console.log(`\n\n\x1b[35mRemoved from employee database\n\x1b[0m`))
+                    .then(() => startupMenu());
+            });
+    });
+};
+
 startupMenu();
