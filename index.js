@@ -32,6 +32,7 @@ function startupMenu() {
                     addDepartment();
                     break;
                 case "Add Role":
+                    addRole();
                     break;
                 case "Add Employee":
                     break;
@@ -88,4 +89,38 @@ function addDepartment() {
         });
 };
 
+function addRole() {
+    qry.queryDepartments().then(([data]) => {
+        const options = data.map(({id, name}) => ({
+            name: name,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "input",
+                    name: "title",
+                    message: "What is the name of the role?",
+                },
+                {
+                    type: "input",
+                    name: "salary",
+                    message: "What is the salary of the role?",
+                },
+                {
+                    type: "list",
+                    name: "department_id",
+                    message: "Which department does the role belong to?",
+                    choices: options,
+                    loop: false
+                }
+            ]).then((data) => {
+                qry.insertRole(data)
+                    .then(() => {
+                        console.log(`\n\n\x1b[35mAdded ${data.title} to the role database\n\x1b[0m`);
+                        startupMenu();
+                    });
+            });
+    });
+};
 startupMenu();
