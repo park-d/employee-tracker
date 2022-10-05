@@ -35,6 +35,7 @@ function startupMenu() {
                     addRole();
                     break;
                 case "Add Employee":
+                    addEmployee();
                     break;
                 case "Update Employee Role":
                     break;
@@ -123,4 +124,51 @@ function addRole() {
             });
     });
 };
+
+function addEmployee() {
+    qry.queryEmployees().then(([dataEmp]) => {
+        const managerOptions = dataEmp.map(({id, first_name, last_name}) => ({
+            name: `${first_name} ${last_name}`,
+            value: id
+        }));
+        qry.queryRoles().then(([dataRole]) => {
+            roleOptions = dataRole.map(({id, title}) => ({
+                name: title,
+                value: id
+            }));
+            inquirer
+                .prompt([
+                    {
+                        type: "input",
+                        name: "first_name",
+                        message: "What is the employee's first name?",
+                    },
+                    {
+                        type: "input",
+                        name: "last_name",
+                        message: "What is the employee's last name?",
+                    },
+                    {
+                        type: "list",
+                        name: "role_id",
+                        message: "What is the employee's role?",
+                        choices: roleOptions,
+                        loop: false
+                    },
+                    {
+                        type: "list",
+                        name: "manager_id",
+                        message: "Who is the employee's manager?",
+                        choices: [{name: "None", value: null}, ...managerOptions],
+                        loop: false
+                    }
+                ]).then((response) => {
+                    qry.insertEmployee(response)
+                        .then(() => console.log(`\n\n\x1b[35mAdded ${response.first_name} ${response.last_name} to the role database\n\x1b[0m`))
+                        .then(() => startupMenu());
+                });
+        });
+    });
+};
+
 startupMenu();
