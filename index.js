@@ -29,6 +29,7 @@ function startupMenu() {
                 case "View Employees by Department":
                     break;
                 case "Add Department":
+                    addDepartment();
                     break;
                 case "Add Role":
                     break;
@@ -67,6 +68,24 @@ function viewEmployees() {
         console.log(`\n\n\x1b[33mList of All Employees\n\x1b[0m`);
         console.table(result);
     }).then(() => startupMenu());
+};
+
+function addDepartment() {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "name",
+                message: "What is the name of the department?",
+            }
+        ]).then((data) => {
+            console.log(data);
+            qry.insertDepartment(data)
+                .then(() => {
+                    console.log(`\n\n\x1b[35mAdded ${data.name} to the department database\n\x1b[0m`);
+                    startupMenu();
+                });
+        });
 };
 
 startupMenu();
