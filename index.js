@@ -140,7 +140,6 @@ function viewEmployeesByDept() {
                     loop: false
                 }
             ]).then((data) => {
-                console.log(data)
                 qry.queryByDept(data.id)
                     .then(([results]) => {
                         console.log(`\n\n\x1b[35mEmployees by Department\n\x1b[0m`);
@@ -305,7 +304,6 @@ function updateEmployeeRole() {
                         loop: false
                     }
                 ]).then((response) => {
-                    console.log(response.role_id,response.id)
                     qry.updateEmployeeRole(response.role_id, response.id)
                         .then(() => console.log(`\n\n\x1b[33mUpdated employee's role in the employee database\n\x1b[0m`))
                         .then(() => startupMenu());
@@ -342,7 +340,7 @@ function updateEmployeeManager() {
                         loop: false
                     }
                 ]).then((response) => {
-                    qry.updateEmployee(response.manager_id,response.id)
+                    qry.updateEmployeeManager(response.manager_id,response.id)
                         .then(() => console.log(`\n\n\x1b[33mUpdated employee's manager in the employee database\n\x1b[0m`))
                         .then(() => startupMenu());
                 });
