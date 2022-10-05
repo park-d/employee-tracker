@@ -41,6 +41,7 @@ function startupMenu() {
                     updateEmployeeRole();
                     break;
                 case "Update Employee Manager":
+                    updateEmployeeManager();
                     break;
                 case "Quit":
                     break;
@@ -207,5 +208,42 @@ function updateEmployeeRole() {
         });
     });
 };
+
+function updateEmployeeManager() {
+    qry.queryEmployees().then(([dataEmp]) => {
+        const employeeOptions = dataEmp.map(({id, first_name, last_name}) => ({
+            name: `${first_name} ${last_name}`,
+            value: id
+        }));
+        qry.queryEmployees().then(([dataManager]) => {
+            managerOptions = dataManager.map(({id, first_name, last_name}) => ({
+                name: `${first_name} ${last_name}`,
+                value: id
+            }));
+            inquirer
+                .prompt([
+                    {
+                        type: "list",
+                        name: "id",
+                        message: "Which employee's manager do you want to update?",
+                        choices: employeeOptions,
+                        loop: false
+                    },
+                    {
+                        type: "list",
+                        name: "role_id",
+                        message: "Which manager do you want to assign the selected employee?",
+                        choices: managerOptions,
+                        loop: false
+                    }
+                ]).then((response) => {
+                    qry.updateEmployee(response)
+                        .then(() => console.log(`\n\n\x1b[35mUpdated employee's manager in the employee database\n\x1b[0m`))
+                        .then(() => startupMenu());
+                });
+        });
+    });
+};
+
 
 startupMenu();
