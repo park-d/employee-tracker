@@ -25,6 +25,7 @@ function startupMenu() {
                     viewEmployees();
                     break;
                 case "View Manager's Direct Reports":
+                    viewDirectReports();
                     break;
                 case "View Employees by Department":
                     break;
@@ -245,5 +246,30 @@ function updateEmployeeManager() {
     });
 };
 
-
+function viewDirectReports() {
+    qry.queryEmployees().then(([managerData]) => {
+        const managerOptions = managerData.map(({id, first_name, last_name}) => ({
+            name: `${first_name} ${last_name}`,
+            value: id
+        }));
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "manager_id",
+                    message: "Which manager's direct reports would you like to view?",
+                    choices: managerOptions,
+                    loop: false
+                }
+            ]).then((data) => {
+                console.log(data.manager_id);
+                qry.queryDirectReports(data.manager_id)
+                    .then(([results]) => {
+                        console.log(`\n\n\x1b[33mList of Direct Reports\n\x1b[0m`);
+                        console.table(results);
+                        startupMenu();
+                    });
+            });
+    });
+};
 startupMenu();
