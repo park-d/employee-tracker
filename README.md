@@ -34,6 +34,7 @@ Also, the instructions for the assignment told us to use promises for this assig
 - [process.exit()](https://www.geeksforgeeks.org/how-to-exit-process-in-node-js/)
 - [process.exit()](https://nodejs.org/dist/latest-v16.x/docs/api/process.html)
 - [.promise()](https://www.npmjs.com/package/mysql2)
+- [constructor method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/constructor)
 
 ## License
 Licensed by The Unlicense
